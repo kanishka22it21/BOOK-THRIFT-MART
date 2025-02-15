@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      # Install dependencies for the build
+      - pip install -r requirements.txt
+  build:
+    commands:
+      # Build the Docker image
+      - docker build -t book-thrift-mart .
+      # Tag the image for the ECR repository
+      - docker tag book-thrift-mart:latest your-ecr-repo/book-thrift-mart:latest
+  post_build:
+    commands:
+      # Login to ECR
+      - echo "Logging into ECR..."
+      - aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin your-ecr-repo
+      # Push the Docker image to ECR
+      - docker push your-ecr-repo/book-thrift-mart:latest
+
+artifacts:
+  files:
+    - imagedefinitions.json
